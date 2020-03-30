@@ -1,0 +1,57 @@
+app:
+  env: dev
+  emr_prefix: emr-dev
+
+  caching:
+    enabled: true
+    method: redis
+
+  redis:
+    ttl: 14400
+    host: meghdoot-cache-dev-001.usw2.cache.amazonaws.com
+    port: 1234
+    timeoutInSecs: 30
+    emrStatesDatabaseIndex: 0
+    emrStepsDatabaseIndex: 1
+    failedStepsDatabaseIndex: 2
+
+  service_catalog:
+    common:
+      product_name: EMR-DEV
+      bootstrapScriptsBasePath: 's3://processing-dev/scripts'
+      config:
+        BootstrapPath1: s3://processing-dev/artifacts/emr/bootstrap.sh
+        BootstrapPath2: ${app.service_catalog.common.bootstrapScriptsBasePath}/bootstrap_emr/bootstrap_emr.sh
+        BootstrapArgs2: dev
+        MasterSecurityGroup0: 'sg-11112222aaaabbbb'
+        SlaveSecurityGroup0: 'sg-11112222aaaabbbb'
+        EMRApplicationRole: 'profile-processing-dev'
+        EMRS3LogPath: 's3://${app.emr.common.logsBucketName}/${app.emr.common.logsPathPrefix}'
+        MasterEbsVolumeSizeGB: 40
+        TaskEbsVolumeSizeGB: 40
+        CoreEbsVolumeSizeGB: 40
+        MasterInstanceType: 'c5.2xlarge'
+        TaskInstanceType: 'c5.2xlarge'
+        CoreInstanceType: 'c5.2xlarge'
+        EMRInstanceKey: processing-dev
+
+  emr:
+    common:
+      logsBucketName: processing-dev
+      logsPathPrefix: logs/emr
+      stdoutFileName: stdout.gz
+      stderrFileName: stderr.gz
+      scriptRunnerPath: 's3://processing-dev/script-runner.jar'
+      bootstrapScriptsBasePath: 's3://processing-dev/scripts'
+      runnerPath: '${app.emr.common.bootstrapScriptsBasePath}/runner/runner.sh'
+  dataset1:
+    service_catalog_version: 1.0.0
+    emr_version: emr-5.20.0
+    MasterInstanceType: 'm5.2xlarge'
+    CoreInstanceType: 'm5.2xlarge'
+    TaskInstanceType: 'm5.2xlarge:1'
+    MaxTaskInstanceCount: 10
+    CoreInstanceCount: 5
+    TaskInstanceCount: 5
+    TaskAutoScaleRule1: '{"Name":"emr-auto-scale-out-1", "ScalingAdjustment":"5", "MetricName":"YARNMemoryAvailablePercentage", "ComparisonOperator":"LESS_THAN", "Threshold":"10.0", "Unit":"PERCENT", "EvaluationPeriods":"1", "CoolDown":"300", "Period":300 }'
+    TaskAutoScaleRule2: '{"Name":"emr-auto-scale-in-1", "ScalingAdjustment":"-5", "MetricName":"YARNMemoryAvailablePercentage", "ComparisonOperator":"GREATER_THAN", "Threshold":"50.0", "Unit":"PERCENT", "EvaluationPeriods":"2", "CoolDown":"300", "Period":300 }'

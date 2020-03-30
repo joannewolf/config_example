@@ -1,0 +1,38 @@
+pipelines:
+  configs:
+    dataset1:
+      productName: ${app.service_catalog.common.product_name}
+      productVersion: ${app.dataset1.service_catalog_version}
+      ## ERROR,RETURN_INSTANCE
+      existingEMRPolicy: RETURN_INSTANCE
+      # ALL, STDOUT, STDERR
+      jobsLogsLevel: STDERR
+      preApplicationSteps:
+        - download_jars
+        - enable_concurrent_steps_execution
+      serviceCatalogConfig:
+        EMRVersion: ${app.dataset1.emr_version}
+        Application0: 'Hadoop'
+        Application1: 'HCatalog'
+        Application2: 'Hive'
+        Application3: 'Spark'
+        Application4: 'Tez'
+        BootstrapPath1: ${app.service_catalog.common.config.BootstrapPath1}
+        BootstrapPath2: ${app.service_catalog.common.config.BootstrapPath2}
+        BootstrapArgs2: ${app.service_catalog.common.config.BootstrapArgs2}
+        EMRInstanceKey: ${app.service_catalog.common.config.EMRInstanceKey}
+        MaxTaskInstanceCount: ${app.dataset1.MaxTaskInstanceCount}
+        CoreInstanceCount: ${app.dataset1.CoreInstanceCount}
+        TaskInstanceCount: ${app.dataset1.TaskInstanceCount}
+        TaskAutoScaleRule1: ${app.dataset1.TaskAutoScaleRule1}
+        TaskAutoScaleRule2: ${app.dataset1.TaskAutoScaleRule2}
+        MasterInstanceType: ${app.dataset1.MasterInstanceType}
+        CoreInstanceType: ${app.dataset1.CoreInstanceType}
+        TaskInstanceType: ${app.dataset1.TaskInstanceType}
+        MasterEbsVolumeSizeGB: ${app.service_catalog.common.config.MasterEbsVolumeSizeGB}
+        CoreEbsVolumeSizeGB: ${app.service_catalog.common.config.CoreEbsVolumeSizeGB}
+        TaskEbsVolumeSizeGB: ${app.service_catalog.common.config.TaskEbsVolumeSizeGB}
+        MasterSecurityGroup0: ${app.service_catalog.common.config.MasterSecurityGroup0}
+        SlaveSecurityGroup0: ${app.service_catalog.common.config.SlaveSecurityGroup0}
+        EMRApplicationRole: ${app.service_catalog.common.config.EMRApplicationRole}
+        EMRS3LogPath: ${app.service_catalog.common.config.EMRS3LogPath}

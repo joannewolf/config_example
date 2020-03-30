@@ -1,0 +1,74 @@
+app:
+  concurrency: 3
+
+  emr:
+    list_states: STARTING,BOOTSTRAPPING,RUNNING,WAITING
+
+  polling:
+    initialWaitTimeEMR: 120 #2 min
+    checkWaitGapEMR: 60 #1 min
+    checkWaitGapStep: 30 #30 sec
+    maxWaitTimeEMR: 3600 #1 hr
+    maxWaitTimeStep: 43200 #12 hrs
+    s3logsInitDelaySec: 120 # 2 min
+    hitApiThresholdEMR: 3600 ##1 Hr
+    hitApiThresholdStep: 10800 ## 3 hours
+
+  templates:
+    emrTemplates:
+      default_emr:
+        productName: ${app.service_catalog.common.product_name}
+        productVersion: ${app.groups.service_catalog_version}
+        ## ERROR,RETURN_INSTANCE
+        existingEMRPolicy: RETURN_INSTANCE
+          # ALL, STDOUT, STDERR
+        jobsLogsLevel: STDERR
+        serviceCatalogConfig:
+          EMRVersion: ${app.groups.emr_version}
+          Application0: 'Hadoop'
+          Application1: 'HCatalog'
+          Application2: 'Hive'
+          Application3: 'Spark'
+          Application4: 'Tez'
+          BootstrapPath1: ${app.service_catalog.common.config.BootstrapPath1}
+          BootstrapPath2: ${app.service_catalog.common.config.BootstrapPath2}
+          BootstrapArgs2: ${app.service_catalog.common.config.BootstrapArgs2}
+          EMRInstanceKey: ${app.service_catalog.common.config.EMRInstanceKey}
+          MasterInstanceType: ${app.service_catalog.common.config.MasterInstanceType}
+          CoreInstanceType: ${app.service_catalog.common.config.CoreInstanceType}
+          MasterEbsVolumeSizeGB: ${app.service_catalog.common.config.MasterEbsVolumeSizeGB}
+          CoreEbsVolumeSizeGB: ${app.service_catalog.common.config.CoreEbsVolumeSizeGB}
+          MasterSecurityGroup0: ${app.service_catalog.common.config.MasterSecurityGroup0}
+          SlaveSecurityGroup0: ${app.service_catalog.common.config.SlaveSecurityGroup0}
+          EMRApplicationRole: ${app.service_catalog.common.config.EMRApplicationRole}
+          EMRS3LogPath: ${app.service_catalog.common.config.EMRS3LogPath}
+          CoreInstanceCount: ${app.groups.default.CoreInstanceCount}
+
+    stepArgumentsTemplates:
+      ingestion_job:
+        type: SHELL
+        actionOnFailure: CONTINUE
+        scriptRunnerPath: ${app.emr.common.scriptRunnerPath}
+      ingestion_job2:
+        type: SHELL
+        actionOnFailure: CONTINUE
+        scriptRunnerPath: ${app.emr.common.scriptRunnerPath2}
+
+  pre-application-steps-definition:
+    stepArguments:
+      download_jars:
+        name: download_jars
+        type: SHELL
+        scriptRunnerPath: "${app.emr.common.scriptRunnerPath}"
+        actionOnFailure: CONTINUE
+        arguments:
+          - "${app.emr.common.bootstrapScriptsBasePath}/bootstrap/download_jars.sh"
+          - "${app.env}"
+      enable_concurrent_steps_execution:
+        name: enable_concurrent_steps_execution
+        type: SHELL
+        arguments:
+          - "${app.emr.common.bootstrapScriptsBasePath}/bootstrap/enable_concurrent_steps_execution.sh"
+          - "${app.meghdoot.concurrency}"
+        scriptRunnerPath: "${app.emr.common.scriptRunnerPath}"
+        actionOnFailure: TERMINATE_CLUSTER
